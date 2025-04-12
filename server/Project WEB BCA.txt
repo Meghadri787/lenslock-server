@@ -1,0 +1,114 @@
+### Project WEB BCA (Smriti, Koyel, Subhankar, Meghadri)
+
+Name : 
+
+System design:
+   -  Photographer:
+	-- Account create and login
+	-- Bucket create [Collection of image or video]
+	-- Share a QR code and add credentials for use
+	-- 
+
+   - User:
+	-- Request for access
+	-- After approve they can access the bucket
+
+
+Features:
+  
+
+
+Technology use:
+  - ReactJS  --------------------> Frontend Library
+  - Zustand  --------------------> State Management
+  - Tailwind CSS ----------------> CSS library
+  - React Icon  -----------------> Icon packs
+  - Node with Express.JS  -------> Backend and API creation
+  - MongoDB  --------------------> DB connection
+  - Cloudinary  -----------------> Storage 
+  - Nodemailer  -----------------> Mail service
+  - Zod -------------------------> Validation
+  - BcryptJS --------------------> Password Hashing
+
+
+
+----------------------------- data base model creation --------------------------------------------- 
+
+
+ 1.user 
+
+ 2. studios : ( Meghadri )
+   - photographer : required 
+   - name  : required
+   - description : optional
+   - location  : optional
+   - phoneNumber :  required 
+   - email :  optional 
+   - image : {
+      url : ,
+      publicId : ,
+   }
+
+ 3.Photographers : ( Subhankar )
+   - user 
+   - experience 
+   - 
+
+ 4. buckets : - (smriti )
+ {
+    studio : required (studioId) 
+    user : required (userId)
+    name : required 
+    description : optional 
+    qr : 
+      {
+        url : ,
+        publicId : ,
+      }
+    
+    link : string ,
+    accessList : [
+      {
+        type : Schema.Types.ObjectId , 
+        ref : "media"
+        required
+      }
+    ] ,
+    accessRequests : [
+      {
+        type : Schema.Types.ObjectId , 
+        ref : "media"
+        required
+      }
+    ]
+ }
+
+
+ 5.media : (smriti )
+ {
+   bucket : required
+   user : userId 
+   mediaType : ["image" , "video" , "audio" ]
+   media : {
+      url : ,
+      publicId : ,
+   }
+   likes : [
+      {
+         user : userId 
+      }
+   ]
+ } 
+
+6. request : ( Koyel )
+   - user : userId 
+   - media : [
+      {
+        type : Schema.Types.ObjectId , 
+        ref : "media"
+        required
+      }
+   ] 
+   - title 
+   - description 
+
