@@ -52,22 +52,51 @@ class UserValidations {
             .strict(),
     });
 
-    updateProfile = z.object({
+    // updateProfile = z.object({
+    //     body: z
+    //         .object({
+    //             name: z
+    //                 .string()
+    //                 .trim()
+    //                 .min(3, "Name must be at least 3 characters long")
+    //                 .max(60, "Name must be within 60 characters")
+    //                 .optional(),
+    //             profile_pic: z
+    //                 .object({
+    //                     url: z.string().url().optional(),
+    //                     public_id: z.string().optional(),
+    //                 })
+    //                 .optional(),
+    //             isProfileComplete: z.boolean().optional(),
+    //         })
+    //         .strict(),
+    // });
+
+    forgotPassword = z.object({
         body: z
             .object({
-                name: z
+                email: z.string().trim().email("Valid email required"),
+            })
+            .strict(),
+    });
+
+    verifyOtp = z.object({
+        body: z
+            .object({
+                email: z.string().trim().email("Valid email required"),
+                otp: z.string().trim().length(6, "OTP must be 6 digits"),
+            })
+            .strict(),
+    });
+
+    resetPassword = z.object({
+        body: z
+            .object({
+                email: z.string().trim().email("Valid email required"),
+                otp: z.string().trim().length(6, "OTP must be 6 digits"),
+                newPassword: z
                     .string()
-                    .trim()
-                    .min(3, "Name must be at least 3 characters long")
-                    .max(60, "Name must be within 60 characters")
-                    .optional(),
-                profile_pic: z
-                    .object({
-                        url: z.string().url().optional(),
-                        public_id: z.string().optional(),
-                    })
-                    .optional(),
-                isProfileComplete: z.boolean().optional(),
+                    .min(8, "Password must be 8 characters or more"),
             })
             .strict(),
     });

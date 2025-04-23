@@ -12,12 +12,11 @@ server.use(express.json({ limit: "50mb" }));
 server.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 // all routes
-
 server.use("/api/v1/auth/", userRouter);
 
 server.get("/", (req, res) => {
-    res.send("application is run ").json({
-        message: "all ok ",
+    return res.status(200).json({
+        message: "all ok ✅",
     });
 });
 

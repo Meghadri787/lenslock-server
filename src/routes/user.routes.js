@@ -11,19 +11,21 @@ router
         validate(userValidation.createUser),
         userController.createUser
     )
-    .post("/login", validate(userValidation.login), userController.loginUser);
-// .post("/send-otp", validate(userSchemas.sendOtp), sendOtpForVerifyAccount)
-// .post("/verify-otp", validate(userSchemas.verifyOtp), VerifyOtpWithExpiry);
-// .patch("/change-profile-pic", validate(userSchemas.changeProfilePic),  changeProfilePic)
-// .patch("/update-role/:userId", validate(userSchemas.updateUserRole),  updateUserRoleByAdmin)
-// .patch("/two-step-auth", validate(userSchemas.addTwoStepVerification),  addTwoStepVerification)
-// .patch("/update/:id", validate(userSchemas.updateUser),  updateUser)
-// .post("/forgot-password", validate(userSchemas.forgotPassword),  forgotPassword)
-// .post("/reset-password", validate(userSchemas.changePasswordWithOtp),  changePassWithOtp)
-// .post(
-//     "/change-password",
-//     validate(userSchemas.changePasswordWithOldPassword),
-//      ChangePasswordWithOldPassword,
-// )
+    .post("/login", validate(userValidation.login), userController.loginUser)
+    .post(
+        "/forgot-password",
+        validate(userValidation.forgotPassword),
+        userController.forgotPassword
+    )
+    .post(
+        "/verify-otp",
+        validate(userValidation.verifyOtp),
+        userController.verifyOtp
+    )
+    .post(
+        "/reset-password",
+        validate(userValidation.resetPassword),
+        userController.resetPassword
+    );
 
 export const userRouter = router;
