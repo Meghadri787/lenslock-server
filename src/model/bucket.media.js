@@ -2,11 +2,11 @@ import { model, Schema } from "mongoose";
 
 const bucktModel = new Schema(
     {
-        studio: {
-            type: Schema.Types.ObjectId,
-            ref: "studio",
-            required: [true, "studio is required !"],
-        },
+        // studio: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "studio",
+        //     required: [true, "studio is required !"],
+        // },
         user: {
             type: Schema.Types.ObjectId,
             ref: "user",
@@ -14,7 +14,7 @@ const bucktModel = new Schema(
         },
         name: {
             type: String,
-            required: [true, "name is required !"],
+            required: [true, "Bucket name is required !"],
             trim: true,
             minLength: [3, "name must be 3 char or more "],
             maxLangth: [60, "name must be under 60 char"],
@@ -22,8 +22,8 @@ const bucktModel = new Schema(
         description: {
             type: String,
             trim: true,
-            minLength: [3, "description must be 3 char or more "],
-            maxLangth: [500, "description must be under 500 char"],
+            minLength: [3, "Bucket description must be 3 char or more "],
+            maxLangth: [500, "Bucket description must be under 500 char"],
         },
         qr: {
             url: {

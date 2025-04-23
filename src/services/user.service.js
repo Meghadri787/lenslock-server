@@ -1,6 +1,7 @@
 import { RESPONSE_MESSAGES } from "../constants/responseMessage.constants.js";
 import { Users } from "../model/user.model.js";
 import { sendOtpEmail } from "../utils/otpEmail.service.js";
+import { sendPasswordResetSuccessEmail } from "../utils/passwordResetSuccess.service.js";
 import { sendRegisterEmail } from "../utils/registerEmail.service.js";
 
 class UserService {
@@ -105,6 +106,8 @@ class UserService {
         user.otpExpiary = undefined;
 
         await user.save();
+
+        await sendPasswordResetSuccessEmail(email, user.name);
 
         return {
             message: RESPONSE_MESSAGES.PASSWORD_UPDATED,
