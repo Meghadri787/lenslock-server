@@ -7,7 +7,8 @@ import { sendResponse } from "../utils/response.handler.js";
 class UserController {
     async createUser(req, res) {
         try {
-            const isExists = Users.findOne({ email: req.body.email });
+            const isExists = await Users.findOne({ email: req.body.email });
+
             if (isExists) {
                 return sendResponse(res, {
                     status: HTTP_STATUS.CONFLICT,
