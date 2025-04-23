@@ -1,4 +1,4 @@
-import mongoose, { model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
 // table stracture
@@ -9,7 +9,7 @@ const userSchema = new Schema(
             maxLength: [60, "name should be in 60 latter"],
             minLength: [3, "name must be 3 latter or more"],
             required: [true, "name is reqired!"],
-            trim: true, // "   som   "
+            trim: true,
         },
         email: {
             type: String,
