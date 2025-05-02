@@ -1,10 +1,11 @@
 
 import jwt from "jsonwebtoken";
-import { Users } from "../models/user.model.js";
+import { Users } from "../model/user.model.js";
+
 
 export const isAuthenticate = async (req, res , next) => {
     try {
-        const token = req.cookies.token || req.headers.token;
+        const token = req.cookies.token ? req.cookies.token : req.headers.token;
         // console.log( ' token' , token);
         
         if (!token) {

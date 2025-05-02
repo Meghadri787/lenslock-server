@@ -1,118 +1,167 @@
-import { RESPONSE_MESSAGES } from "../constants/responseMessage.constants.js";
-import { Users } from "../model/user.model.js";
-import { sendOtpEmail } from "../utils/otpEmail.service.js";
-import { sendPasswordResetSuccessEmail } from "../utils/passwordResetSuccess.service.js";
-import { sendRegisterEmail } from "../utils/registerEmail.service.js";
 
-class UserService {
-    async createUser(body) {
-        const data = await Users.create({
-            name: body.name,
-            email: body.email,
-            password: body.password,
-            profile_pic: body.profile_pic, // optional
-            role: body.role, // optional
-            otp: body.otp, // optional
-            otpExpiary: body.otpExpiary, // optional
-            isProfileComplete: body.isProfileComplete, // optional
-        });
+import { sendEmail } from "../utils/sendMail.js"
+import { genarate6DigitOtp } from "../utils/OtpGenarate.js"
+import { fileDestroy, fileUploader } from "../utils/fileUpload.js"
+import { timeExpire } from "../utils/timeExpire.js"
+import { Users } from "../model/user.model.js"
 
-        await sendRegisterEmail(data.email, data.name);
+import mongoose from "mongoose"
+import {  tokenGenarate } from "../utils/tokenGenarate.js"
 
-        return data;
+
+export const UserService = {
+
+  async createUser(body) {
+    console.log("ok created account ");
+    
+    // step1 : email exist or not 
+    const { email } = body
+    const isExist = await Users.findOne({ email })
+    if(isExist) { 
+      throw new Error("User alrady exist ")
     }
 
-    async login({ email, password }) {
-        const user = await Users.findOne({ email }).select("+password");
+    const user = await Users.create(body)
 
-        if (!user) {
-            throw new Error("Invalid email or password");
-        }
+    const otp = genarate6DigitOtp()
+    user.otp = otp
+    user.otpExpiary = Date.now() + 5 * 60 * 1000 // OTP valid for 5 minutes
 
-        const isPasswordMatch = await user.comparePassword(password);
+    await user.save()
 
-        if (!isPasswordMatch) {
-            throw new Error("Invalid email or password");
-        }
+    await sendEmail(
+      user.email,
+      `Welcome ${user.name}`,
+      "Thank you for choosing BookBuddy. for your Reading Partner .",
+    )
+    await sendEmail(user.email, "Verify Account - OTP", otp)
+    const token = await tokenGenarate(user)
+    return { token , user}
+  },
 
-        user.password = undefined;
-
-        return user;
+  async verifyOtp(otp) {
+    const user = await Users.findOne({ otp , otpExpiary: { $gt: Date.now() } })    
+    if (!user) {
+      throw new Error("Invalid OTP")
     }
 
-    async forgotPassword(email) {
-        const user = await Users.findOne({ email });
+    user.otp = null
+    user.otpExpiary = null
+    user.isVerify = true
+    await user.save()
+    return user
+  },
 
-        if (!user) {
-            throw new Error("User not found");
-        }
-
-        const otp = Math.floor(100000 + Math.random() * 900000); // 6 digit OTP
-        const otpExpiary = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
-
-        user.otp = otp;
-        user.otpExpiary = otpExpiary;
-
-        await user.save();
-
-        // Send OTP via email
-        await sendOtpEmail(user.email, otp);
-        // const emailSent = await sendOtpEmail(user.email, otp);
-
-        // if (!emailSent) {
-        //     // If email sending fails, we'll still return success but log the issue
-        //     console.warn(`⚠️ OTP generated for ${email} but email sending failed. OTP: ${otp}`);
-        //     return {
-        //         message: "OTP generated but email sending failed. Please contact support.",
-        //         otp: otp // Only include OTP in development environment
-        //     };
-        // }
-
-        return {
-            message: RESPONSE_MESSAGES.EMAIL_SENT_SUCCESS,
-        };
+  async sendOtpForVerification(email) {
+    const user = await Users.findOne({ email })
+    if (!user) {
+      throw new Error("User not found")
     }
 
-    async verifyOtp(email, otp) {
-        const user = await Users.findOne({ email, otp });
+    const otp = genarate6DigitOtp()
+    user.otp = otp
+    user.otpExpiary = Date.now() + 5 * 60 * 1000 // OTP valid for 5 minutes
+    await user.save()
+    await sendEmail(email, "Verify Account - OTP", otp)
+  },
 
-        if (!user) {
-            throw new Error("Invalid OTP or Email");
+  async loginUser(email, password) {
+    const user = await Users.findOne({ email }).select("+password")
+    if (!user || !(await user.comparePassword(password))) {
+      throw new Error("Invalid email or password")
+    }
+    const token = await tokenGenarate(user)
+    return { token , user}
+  },
+
+  async getUserById(id) {
+    const user = await Users.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) } // Match the user by ID
+      },
+
+      {
+        $lookup: {
+          from: "users", // Collection name should match MongoDB collection (pluralized)
+          localField: "friends",
+          foreignField: "_id",
+          as: "friends",
         }
-
-        if (user.otpExpiary < new Date()) {
-            throw new Error("OTP expired");
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "friendsRequast", // Ensure the field name matches the schema
+          foreignField: "_id",
+          as: "friendRequests",
         }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "sendFriendRequst",
+          foreignField: "_id",
+          as: "sentFriendRequests",
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          profile_pic: 1,
+          totalFriends: { $size: "$friends" }, // Calculate total number of friends
+          friends: { _id:1 , name: 1, email: 1, profile_pic: 1 },
+          friendRequests: { _id:1 , name: 1, email: 1, profile_pic: 1 },
+          sentFriendRequests: {_id:1 , name: 1, email: 1, profile_pic: 1 }
+        }
+      }
+    ]);
 
-        // OTP verified successfully
-        return {
-            message: RESPONSE_MESSAGES.OTP_VERIFIED,
-        };
+
+  if (!user) throw new Error("User not found")
+ console.log("user ========> " , user);
+ 
+  return user 
+},
+
+  async getAllUser(userId){
+    return await Users.find({_id : {$ne:userId}})
+  } , 
+
+
+
+  async changeProfilePic(id, file) {
+
+    const user = await Users.findById(id)
+    if (!user) {
+      throw new Error("User not found")
     }
 
-    async resetPassword(email, otp, newPassword) {
-        const user = await Users.findOne({ email, otp });
-
-        if (!user) {
-            throw new Error("Invalid OTP or Email");
-        }
-
-        if (user.otpExpiary < new Date()) {
-            throw new Error("OTP expired");
-        }
-
-        user.password = newPassword;
-        user.otp = undefined;
-        user.otpExpiary = undefined;
-
-        await user.save();
-
-        await sendPasswordResetSuccessEmail(email, user.name);
-
-        return {
-            message: RESPONSE_MESSAGES.PASSWORD_UPDATED,
-        };
+    if (user.profile_pic?.public_id) {
+      await fileDestroy(user.profile_pic.public_id)
     }
+
+    const { url, public_id, error } = await fileUploader(file)
+    if (error) {
+      throw new Error("File upload failed")
+    }
+
+    user.profile_pic = { url, public_id }
+    await user.save()
+    return user
+  },
+
+
+
+
+  async deleteUser(id) {
+    return await Users.findByIdAndDelete(id)
+  },
+
+  async updateUser(id, updateData) {
+    return await Users.findByIdAndUpdate(id, updateData, { new: true })
+  },
+
+  
 }
 
-export default new UserService();

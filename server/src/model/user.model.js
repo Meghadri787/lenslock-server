@@ -40,9 +40,12 @@ const userSchema = new Schema(
         },
         role: {
             type: String,
-            enum: ["user", "admin", "controller"],
+            enum: ["user", "admin", "photographer"],
             default: "user",
         },
+        experiance : {
+            type : String
+        } , 
         otp: {
             type: Number,
         },
