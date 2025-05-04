@@ -1,31 +1,23 @@
-import express from "express";
-import { validate } from "../middlewares/validate.middleware.js";
-import userValidation from "../validations/user.validation.js";
-import userController from "../controller/user.controller.js";
+import express from 'express';
+import { isAuthenticate, authorizeRoles } from '../middleware/auth.middleware.js';
+import { validate } from '../middleware/validate.middleware.js';
+
+import { createUser, deleteUser, logInUser, sendOtpForVerifyAccount, verifyOtpWithExpiry, updateUserProfilePic, getUser, updateUser } from '../controllers/user.controller.js';
+import { createUserSchema, loginSchema, sendOtpSchema, verifyOtpSchema, updateProfileSchema, updateProfilePicSchema } from '../validations/user.validation.js';
 
 const router = express.Router();
 
-router
-    .post(
-        "/register",
-        validate(userValidation.createUser),
-        userController.createUser
-    )
-    .post("/login", validate(userValidation.login), userController.loginUser)
-    .post(
-        "/forgot-password",
-        validate(userValidation.forgotPassword),
-        userController.forgotPassword
-    )
-    .post(
-        "/verify-otp",
-        validate(userValidation.verifyOtp),
-        userController.verifyOtp
-    )
-    .post(
-        "/reset-password",
-        validate(userValidation.resetPassword),
-        userController.resetPassword
-    );
+// Public routes
+router.post('/register', validate(createUserSchema), createUser);
+router.post('/login', validate(loginSchema), logInUser);
+router.post('/send-otp', validate(sendOtpSchema), sendOtpForVerifyAccount);
+router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpWithExpiry);
 
-export const userRouter = router;
+// Protected routes
+router.use(isAuthenticate);
+router.get('/profile', getUser);
+router.put('/profile', validate(updateProfileSchema), updateUser);
+router.put('/profile-pic', validate(updateProfilePicSchema), updateUserProfilePic);
+router.delete('/:id', deleteUser);
+
+export default router ;

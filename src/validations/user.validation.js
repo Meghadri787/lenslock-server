@@ -1,105 +1,151 @@
-import { z } from "zod";
+import { z } from "zod"
 
-class UserValidations {
-    createUser = z.object({
-        body: z
-            .object({
-                name: z
-                    .string()
-                    .trim()
-                    .min(3, "Name must be at least 3 characters long")
-                    .max(60, "Name must be at most 60 characters long"),
+export const createUserSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    role: z.enum(["user", "photographer"]).default("user"),
+  }),
+})
 
-                email: z
-                    .string()
-                    .trim()
-                    .email("Please provide a valid email address"),
+export const loginSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(1, "Password is required"),
+  }),
+})
 
-                password: z
-                    .string()
-                    .min(8, "Password must be at least 8 characters long"),
+export const sendOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email address"),
+  }),
+})
 
-                profile_pic: z
-                    .object({
-                        url: z
-                            .string()
-                            .url("Profile picture must be a valid URL")
-                            .optional(),
-                        public_id: z.string().nullable().optional(),
-                    })
-                    .optional(),
+export const verifyOtpSchema = z.object({
+  body: z.object({
+    otp: z.string().length(6, "OTP must be 6 characters"),
+  }),
+})
 
-                role: z.enum(["user", "admin", "controller"]).optional(),
+export const updateProfileSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "Name must be at least 2 characters").optional(),
+    email: z.string().email("Invalid email address").optional(),
+    phone: z.string().optional(),
+    address: z.string().optional(),
+  }),
+})
 
-                otp: z.number().optional(),
+export const updateProfilePicSchema = z.object({
+  body: z.object({
+    profilePic: z.string().url("Invalid profile picture URL"),
+  }),
+})
 
-                otpExpiary: z.date().optional(),
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  }),
+})
 
-                isProfileComplete: z.boolean().optional(),
-            })
-            .strict(),
-    });
+class UserValidation  {
+  createUser = z.object({
+    body: z.object({
+      name: z.string().trim().min(3, "Name is required").max(60 , "name must be 60 charector or less "),
+      email: z.string().trim().email("Invalid email format"),
+      password: z.string().trim().min(8, "Password must be at least 8 characters"),
+    }),
+  })
 
-    login = z.object({
-        body: z
-            .object({
-                email: z.string().trim().email("Invalid email address"),
-                password: z
-                    .string()
-                    .trim()
-                    .min(8, "Password must be at least 8 characters long"),
-            })
-            .strict(),
-    });
+  login = z.object({
+    body: z.object({
+      email: z.string().trim().email("Invalid email format") ,
+      password: z.string().trim().min(8 , "Password is required"),
+    }),
+  })
 
-    // updateProfile = z.object({
-    //     body: z
-    //         .object({
-    //             name: z
-    //                 .string()
-    //                 .trim()
-    //                 .min(3, "Name must be at least 3 characters long")
-    //                 .max(60, "Name must be within 60 characters")
-    //                 .optional(),
-    //             profile_pic: z
-    //                 .object({
-    //                     url: z.string().url().optional(),
-    //                     public_id: z.string().optional(),
-    //                 })
-    //                 .optional(),
-    //             isProfileComplete: z.boolean().optional(),
-    //         })
-    //         .strict(),
-    // });
+  sendOtp = z.object({
+    body: z.object({
+      email: z.string().email("Invalid email format"),
+    }),
+  })
 
-    forgotPassword = z.object({
-        body: z
-            .object({
-                email: z.string().trim().email("Valid email required"),
-            })
-            .strict(),
-    });
+  verifyOtp= z.object({
+    body: z.object({
+      otp: z.string().length(6, "OTP must be 6 digits"),
+    }),
+  })
 
-    verifyOtp = z.object({
-        body: z
-            .object({
-                email: z.string().trim().email("Valid email required"),
-                otp: z.string().trim().length(6, "OTP must be 6 digits"),
-            })
-            .strict(),
-    });
+  changeProfilePic= z.object({
+    body: z.object({
+      file: z.any(), // You might want to use a more specific validation for files
+    }),
+  })
 
-    resetPassword = z.object({
-        body: z
-            .object({
-                email: z.string().trim().email("Valid email required"),
-                otp: z.string().trim().length(6, "OTP must be 6 digits"),
-                newPassword: z
-                    .string()
-                    .min(8, "Password must be 8 characters or more"),
-            })
-            .strict(),
-    });
+  updateUserRole= z.object({
+    params: z.object({
+      userId: z.string().min(1, "User ID is required"),
+    }),
+    body: z.object({
+      newRole: z.enum(["user", "admin", "controller"], {
+        errorMap: () => ({ message: "Invalid role" }),
+      }),
+    }),
+  })
+
+  addTwoStepVerification= z.object({
+    body: z.object({
+      isTwoStepAuth: z.boolean(),
+    }),
+  })
+
+  updateUser= z.object({
+    params: z.object({
+      id: z.string().min(1, "User ID is required"),
+    }),
+    body: z.object({
+      // Add fields that can be updated
+      name: z.string().optional(),
+      email: z.string().email("Invalid email format").optional(),
+      // Add other fields as needed
+    }),
+  })
+
+  forgotPassword= z.object({
+    body: z.object({
+      email: z.string().email("Invalid email format"),
+    }),
+  })
+
+  changePasswordWithOtp= z.object({
+    body: z.object({
+      otp: z.string().length(6, "OTP must be 6 digits"),
+      password: z.string().min(8, "Password must be at least 8 characters"),
+    }),
+  })
+
+  changePasswordWithOldPassword= z.object({
+    body: z.object({
+      oldPassword: z.string().min(1, "Old password is required"),
+      newPassword: z.string().min(8, "New password must be at least 8 characters"),
+    }), 
+  })
+
+  sendFriendRequest = z.object({
+    body : z.object({
+      requastId : z.string().min(1 , "request Id is must  be required ")
+    })
+  }) 
+  manageFriendRequest= z.object({ 
+    body: z.object({
+      requestId: z.string().min(1, "Request ID is required"),
+      action: z.enum(["accept", "reject"], {
+        errorMap: () => ({ message: "Invalid action" }),
+      }),
+    }),
+  })
 }
 
-export default new UserValidations();
+export default new UserValidation()

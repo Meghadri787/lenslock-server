@@ -1,23 +1,47 @@
 import express from "express";
-import bodyParser from "body-parser";
+import cors from "cors";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-import corsConfig from "./src/config/cors.config.js";
-import { userRouter } from "./src/routes/user.routes.js";
+// Routes
 
-const server = express();
+import studioRoutes from "./src/routes/studio.routes.js";
+import bucketRoutes from "./src/routes/bucket.routes.js";
+import mediaRoutes from "./src/routes/media.routes.js";
+import requestRoutes from "./src/routes/request.routes.js";
+import userRoutes from "./src/routes/user.routes.js";
 
-server.use(corsConfig);
-server.use(bodyParser.json({ limit: "50mb" }));
-server.use(express.json({ limit: "50mb" }));
-server.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+// Middleware
+import { errorHandler } from "./src/middleware/error.middleware.js";
 
-// all routes
-server.use("/api/v1/auth/", userRouter);
+// Config
+dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-server.get("/", (req, res) => {
-    return res.status(200).json({
-        message: "all ok ✅",
-    });
-});
+const app = express();
 
-export default server;
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use("/api/user", userRoutes);
+app.use("/api/studios", studioRoutes);
+app.use("/api/buckets", bucketRoutes);
+app.use("/api/media", mediaRoutes);
+app.use("/api/requests", requestRoutes);
+
+app.get("/" , (req , res)=>{
+     res.status(200).json({
+        message :"server is running now "
+     })
+})
+
+// Error handling
+app.use(errorHandler);
+
+export default app
