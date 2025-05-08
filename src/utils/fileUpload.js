@@ -1,26 +1,11 @@
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 
-export const imageFileUploader = async (file)=>{
-
-  try {
-      const data =await cloudinary.uploader.upload(file ,{
-          folder:"bookBuddy"
-      })
-
-    return { url:data.secure_url , public_id: data.public_id , error:null}  
-  } catch (error) {
-    console.error(error);
-    
-      return { url:null , public_id:null , error}
-  }
-
-}
 
 export async function fileUploader(localFilePath) {
   try {
     const result = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: 'raw', // for PDF and other non-image files
+      resource_type: 'auto', // for PDF and other non-image files
       folder: 'books'
     });
     // Delete local file after upload
@@ -32,6 +17,7 @@ export async function fileUploader(localFilePath) {
     };
   } catch (error) {
     // Delete local file if upload failed
+    console.error('Cloudinary upload error:', error);
     if (fs.existsSync(localFilePath)) fs.unlinkSync(localFilePath);
     return { url: null, public_id: null, error };
   }

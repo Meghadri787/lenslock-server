@@ -1,40 +1,43 @@
+// uploadConfig.ts or middleware/upload.ts
 import multer from "multer";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { v2 as cloudinary } from "cloudinary";
+import path from "path";
+import fs from "fs";
 
-// Configure Cloudinary
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+// Ensure uploads folder exists
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+// Multer disk storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir); // temporary local folder
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
 });
 
-// Configure storage
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "lenslock",
-        allowed_formats: ["jpg", "jpeg", "png", "gif", "mp4", "mov", "mp3", "wav"],
-        resource_type: "auto",
-    },
-});
+// Only accept PDF, image, video, audio, etc.
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = [
+    "application/pdf",
+    "image/",
+    "video/",
+    "audio/",
+  ];
 
-// Configure multer
+  if (allowedTypes.some((type) => file.mimetype.startsWith(type))) {
+    cb(null, true);
+  } else {
+    cb(new Error("Unsupported file type"), false);
+  }
+};
+
 export const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        // Accept images, videos, and audio
-        if (
-            file.mimetype.startsWith("image/") ||
-            file.mimetype.startsWith("video/") ||
-            file.mimetype.startsWith("audio/")
-        ) {
-            cb(null, true);
-        } else {
-            cb(new Error("Invalid file type. Only images, videos, and audio are allowed."), false);
-        }
-    },
-}); 
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
+  fileFilter,
+});

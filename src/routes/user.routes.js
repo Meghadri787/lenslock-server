@@ -4,6 +4,7 @@ import { validate } from '../middleware/validate.middleware.js';
 
 import { createUser, deleteUser, logInUser, sendOtpForVerifyAccount, verifyOtpWithExpiry, updateUserProfilePic, getUser, updateUser } from '../controllers/user.controller.js';
 import { createUserSchema, loginSchema, sendOtpSchema, verifyOtpSchema, updateProfileSchema, updateProfilePicSchema } from '../validations/user.validation.js';
+import { upload } from '../middleware/upload.middleware.js';
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpWithExpiry);
 router.use(isAuthenticate);
 router.get('/profile', getUser);
 router.put('/profile', validate(updateProfileSchema), updateUser);
-router.put('/profile-pic', validate(updateProfilePicSchema), updateUserProfilePic);
+router.post('/profile-pic', upload.single("profilePic") , validate(updateProfilePicSchema), updateUserProfilePic);
 router.delete('/:id', deleteUser);
 
 export default router ;

@@ -6,7 +6,7 @@ import { timeExpire } from "../utils/timeExpire.js"
 import { Users } from "../model/user.model.js"
 
 import mongoose from "mongoose"
-import {  tokenGenarate } from "../utils/tokenGenarate.js"
+import {  sendCookie } from "../utils/tokenGenarate.js"
 
 
 export const UserService = {
@@ -35,8 +35,7 @@ export const UserService = {
       "Thank you for choosing BookBuddy. for your Reading Partner .",
     )
     await sendEmail(user.email, "Verify Account - OTP", otp)
-    const token = await tokenGenarate(user)
-    return { token , user}
+    return user 
   },
 
   async verifyOtp(otp) {
@@ -65,13 +64,14 @@ export const UserService = {
     await sendEmail(email, "Verify Account - OTP", otp)
   },
 
-  async loginUser(email, password) {
+  async loginUser(body ,  res) {
+    const { email, password } = body
     const user = await Users.findOne({ email }).select("+password")
     if (!user || !(await user.comparePassword(password))) {
       throw new Error("Invalid email or password")
     }
-    const token = await tokenGenarate(user)
-    return { token , user}
+    sendCookie(user, res, "Login successful")
+    return user
   },
 
   async getUserById(id) {
@@ -130,7 +130,11 @@ export const UserService = {
 
 
 
-  async changeProfilePic(id, file) {
+  async changeProfilePic(id, body , file) {
+
+    console.log("file ====> " , file);
+    console.log("body ====> " , body);
+    
 
     const user = await Users.findById(id)
     if (!user) {
@@ -141,7 +145,7 @@ export const UserService = {
       await fileDestroy(user.profile_pic.public_id)
     }
 
-    const { url, public_id, error } = await fileUploader(file)
+    const { url, public_id, error } = await fileUploader(file.path)
     if (error) {
       throw new Error("File upload failed")
     }
