@@ -23,15 +23,10 @@ export const createUser = async (req, res) => {
 
 export const logInUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const result = await UserService.loginUser(email, password);
-    return sendResponse(res, { 
-      status: HTTP_STATUS.OK, 
-      data: result, 
-      success: true, 
-      message: RESPONSE_MESSAGES.USER_LOGGED_IN 
-    });
+     await UserService.loginUser(req.body , res);
   } catch (error) {
+    console.error(error);
+    
     return sendResponse(res, { 
       status: HTTP_STATUS.BAD_REQUEST, 
       success: false, 
@@ -77,8 +72,9 @@ export const verifyOtpWithExpiry = async (req, res) => {
 
 export const updateUserProfilePic = async (req, res) => {
   try {
-    const { id } = req.user;
-    const user = await UserService.changeProfilePic(id, req.body);
+    // const { id } = req.user;
+    const id = "681ac3195837269f3a30d40c"; // Replace with actual user ID from req.user
+    const user = await UserService.changeProfilePic(id, req.body , req.file);
     return sendResponse(res, { 
       status: HTTP_STATUS.OK, 
       success: true, 

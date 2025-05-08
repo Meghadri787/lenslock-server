@@ -1,3 +1,4 @@
+import { body } from "express-validator"
 import { z } from "zod"
 
 export const createUserSchema = z.object({
@@ -38,8 +39,15 @@ export const updateProfileSchema = z.object({
 })
 
 export const updateProfilePicSchema = z.object({
-  body: z.object({
-    profilePic: z.string().url("Invalid profile picture URL"),
+  file: z.object({
+      fieldname: z.string(),
+      originalname: z.string(),
+      encoding: z.string(),
+      mimetype: z.string(),
+      destination: z.string(),
+      filename: z.string(),
+      path : z.string(),
+      size: z.number().min(1, "File size must be greater than 0"),
   }),
 })
 

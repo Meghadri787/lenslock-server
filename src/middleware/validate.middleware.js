@@ -1,13 +1,19 @@
 import { HTTP_STATUS } from "../constants/statusCode.constants.js"
 
 export const validate = (schema) => (req, res, next) => {
+  // console.log("req.file ====> " , req.file);
+  //   console.log("req.body ====> " , req.body);
   try {
     // Validate request against the schema
     schema.parse({
+
       body: req.body,
       query: req.query,
       params: req.params,
+      file : req.file,
     })
+    
+    
     
     // If validation passes, proceed to the next middleware/controller
     next()
