@@ -43,6 +43,32 @@ const userSchema = new Schema(
             enum: ["user", "admin", "photographer"],
             default: "user",
         },
+        bio:{
+            type: String,
+            maxLength: [200, "bio should be in 200 latter"],
+            required: [false, "bio is not reqired!"],
+            trim: true,
+        } ,
+        phone: {
+            type: String,
+            maxLength: [15, "phone number should be in 15 latter"],
+            minLength: [3, "phone number must be 3 latter or more"],
+            required: [true , "phone number is  reqired!"],
+            trim: true,
+        },
+        address: {
+            type: String,
+            maxLength: [200, "address should be in 200 latter"],
+            required: [false, "address is not  reqired!"],
+            trim: true,
+        },
+        url : {
+            type: String,
+            maxLength: [200, "url should be in 200 latter"],
+            required: [false, "url is not  reqired!"],
+            trim: true,
+        },
+
         experiance : {
             type : String
         } , 
