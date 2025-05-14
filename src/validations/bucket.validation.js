@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createBucketSchema = z.object({
     body: z.object({
         name: z.string().min(1, "Bucket name is required"),
-        studio: z.string().min(1, "Studio ID is required"),
+        // studio: z.string().min(1, "Studio ID is required"),
         description: z.string().optional(),
         isPublic: z.boolean().default(false),
     }),
