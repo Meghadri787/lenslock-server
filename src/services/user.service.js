@@ -34,7 +34,7 @@ export const UserService = {
       `Welcome ${user.name}`,
       "Thank you for choosing BookBuddy. for your Reading Partner .",
     )
-    await sendEmail(user.email, "Verify Account - OTP", otp)
+    // await sendEmail(user.email, "Verify Account - OTP", otp)
     return user 
   },
 
