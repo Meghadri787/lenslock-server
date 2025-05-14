@@ -35,17 +35,21 @@ const bucketSchema = new Schema(
         accessList: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "media",
-                // required: true,
+                ref: "user",
+                required: true,
             },
         ],
         accessRequests: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "media",
-                // required: true,
+                ref: "user",
+                required: true,
             },
         ],
+        isPublic: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

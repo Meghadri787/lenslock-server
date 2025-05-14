@@ -23,7 +23,8 @@ class BucketController {
 
     async getBuckets(req, res) {
         try {
-            const buckets = await bucketService.getBuckets();
+           
+            const buckets = await bucketService.getBuckets(req.user._id);
             return sendResponse(res, {
                 status: 200,
                 success: true,

@@ -13,11 +13,12 @@ class BucketService {
         return bucket;
     }
 
-    async getBuckets() {
-        const buckets = await Buckets.find().populate(
-            "photographer",
-            "name email"
-        );
+    async getBuckets(userId) {
+        console.log(userId);
+        const buckets = await Buckets.find({ user: userId })
+            .populate("user", "_id name email")
+            .populate("accessList.user", "_id name email")
+            .populate("accessRequests.user", "_id name email");
         return buckets;
     }
 
