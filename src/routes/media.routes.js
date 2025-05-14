@@ -16,7 +16,7 @@ router.use(authorizeRoles("photographer"));
 // Routes
 router.post(
     "/",
-    upload.single("media"),
+    upload.single("media")  ,
     validate(mediaValidation.createMedia),
     // mediaController.uploadMedia
 );
