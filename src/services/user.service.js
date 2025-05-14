@@ -156,6 +156,17 @@ export const UserService = {
   },
 
 
+  async logOutUser(req , res) {
+    return res
+        .status(200)
+        .cookie("token", null) // Set the JWT in a cookie
+        .json({
+            success: true,
+            message : "Logout successful",
+            
+        });
+  } ,
+
 
 
   async deleteUser(id) {
