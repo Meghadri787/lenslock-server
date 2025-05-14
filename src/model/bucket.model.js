@@ -54,4 +54,4 @@ const bucketSchema = new Schema(
     { timestamps: true }
 );
 
-export const Buckets = model("bucket", bucketSchema); 
+export const Buckets = model("bucket", bucketSchema);
