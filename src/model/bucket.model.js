@@ -2,11 +2,11 @@ import { model, Schema } from "mongoose";
 
 const bucketSchema = new Schema(
     {
-        studio: {
-            type: Schema.Types.ObjectId,
-            ref: "studio",
-            required: [true, "studio is required!"],
-        },
+        // studio: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "studio",
+        //     required: [true, "studio is required!"],
+        // },
         user: {
             type: Schema.Types.ObjectId,
             ref: "user",
@@ -36,18 +36,18 @@ const bucketSchema = new Schema(
             {
                 type: Schema.Types.ObjectId,
                 ref: "media",
-                required: true,
+                // required: true,
             },
         ],
         accessRequests: [
             {
                 type: Schema.Types.ObjectId,
                 ref: "media",
-                required: true,
+                // required: true,
             },
         ],
     },
     { timestamps: true }
 );
 
-export const Buckets = model("bucket", bucketSchema); 
+export const Buckets = model("bucket", bucketSchema);
