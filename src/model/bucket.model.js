@@ -41,9 +41,20 @@ const bucketSchema = new Schema(
         ],
         accessRequests: [
             {
-                type: Schema.Types.ObjectId,
+               user : {
+                  type: Schema.Types.ObjectId,
                 ref: "user",
                 required: true,
+               }  ,
+               status : {
+                   type : String ,
+                   enum : ["pending" , "rejected" , "accept"] ,
+                   default : "pending"
+               } ,
+               createdAt :{
+                type : Date ,
+                default : Date.now()
+               }
             },
         ],
         isPublic: {

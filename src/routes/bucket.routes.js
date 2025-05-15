@@ -8,6 +8,10 @@ const router = express.Router();
 
 // Protect all routes
 router.use(isAuthenticate);
+router.get("/:id", bucketController.getBucket);
+// Access management
+router.post("/request-access/:id", bucketController.requestBucketAccess);
+
 
 // Only photographers can create and manage buckets
 router.use(authorizeRoles("photographer"));
@@ -15,12 +19,9 @@ router.use(authorizeRoles("photographer"));
 // Routes
 router.post("/", validate(bucketValidation.createBucket),  bucketController.createBucket);
 router.get("/", bucketController.getBuckets);
-router.get("/:id", bucketController.getBucket);
 router.put("/:id", validate(bucketValidation.updateBucket), bucketController.updateBucket);
 router.delete("/:id", bucketController.deleteBucket);
 
-// Access management
-router.post("/:id/request-access", bucketController.requestBucketAccess);
 
 // Generate QR code
 router.get("/:id/qr-code", bucketController.generateQRCode);

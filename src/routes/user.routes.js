@@ -17,8 +17,9 @@ router.post('/verify-otp', validate(verifyOtpSchema), verifyOtpWithExpiry);
 
 // Protected routes
 
+
 router.get('/logout' , isAuthenticate , UserService.logOutUser)
-router.get('/profile',isAuthenticate , getUser);
+router.get('/',isAuthenticate , getUser);
 router.put('/profile',  validate(updateProfileSchema), isAuthenticate ,  updateUser);
 router.post('/profile-pic', upload.single("profilePic") , validate(updateProfilePicSchema), isAuthenticate ,  updateUserProfilePic);
 router.delete('/:id', isAuthenticate ,  deleteUser);

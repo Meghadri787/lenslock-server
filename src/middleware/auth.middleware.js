@@ -20,6 +20,11 @@ export const isAuthenticate = async (req, res , next) => {
         }
 
     } catch (error) {
+        console.error("error in authentication middleware", error);
+        // return res.status(400).json({
+        //     message: "user not authenticate",
+        //     error
+        // });
        return  res.status(400).json({
             message: "user not authenticate",
             error

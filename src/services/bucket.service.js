@@ -25,7 +25,7 @@ class BucketService {
     }
 
     async getBucket(id) {
-        const bucket = await Buckets.findById(id).populate("photographer", "name email");
+        const bucket = await Buckets.findById(id).populate("user", "_id name email");
         
         if (!bucket) {
             throw new Error("Bucket not found");
@@ -129,14 +129,14 @@ class BucketService {
     }
 
     async requestBucketAccess(id, userId) {
-        const bucket = await Buckets.findById(id).populate("photographer", "name email");
+        const bucket = await Buckets.findById(id).populate("user", "_id profile_pic name email");
         
         if (!bucket) {
             throw new Error("Bucket not found");
         }
 
         // Check if user is not the bucket owner
-        if (bucket.photographer.toString() === userId) {
+        if (bucket.user.toString() === userId) {
             throw new Error("Cannot request access to your own bucket");
         }
 
@@ -151,23 +151,27 @@ class BucketService {
         }
 
         // Add access request
+
+        const isMatch = bucket.accessRequests.find((item)=> String(item.user) === String(userId) ) 
+        console.log(isMatch , userId );
+        
+        if(isMatch){
+            throw Error("You have already send request for access this Bucket ")
+        }
+
         bucket.accessRequests.push({
             user: userId,
-            status: "pending",
-            requestedAt: new Date()
         });
 
         await bucket.save();
 
         // Send notification email to photographer
         await sendEmail({
-            to: bucket.photographer.email,
+            receiver: bucket.user.email,
             subject: "New Bucket Access Request",
-            html: `
-                <h1>New Access Request</h1>
-                <p>Someone has requested access to your bucket "${bucket.name}".</p>
-                <p>Please review and respond to this request.</p>
-            `
+            message: `
+                Someone has requested access to your bucket "${bucket.name}".
+                Please review and respond to this request.`
         });
 
         return bucket;
