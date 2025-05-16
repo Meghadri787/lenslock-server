@@ -169,6 +169,10 @@ class BucketController {
                 data: result,
             });
         } catch (error) {
+
+            console.error("============================================ error " , error);
+            
+
             return sendResponse(res, {
                 status: 400,
                 success: false,

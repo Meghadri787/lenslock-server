@@ -3,14 +3,39 @@ import mediaService from "../services/media.service.js";
 import { sendResponse } from "../utils/response.handler.js";
 
 class MediaController {
-    async createMedia(req, res) {
+    async uploadMedia(req, res) {
+        console.log("ok done file uploader controller run ");
+        
         try {
-            const media = await mediaService.createMedia(req.body, req.user._id);
+            // Check if files were uploaded
+            if (!req.files && !req.file) {
+                throw new Error("No files were uploaded");
+            }
+
+            // Handle both single file (req.file) and multiple files (req.files) cases
+            const files = req.files || [req.file];
+
+            // Ensure files array is not empty
+            if (!files.length) {
+                throw new Error("No valid files were uploaded");
+            }
+
+            // Upload all files to the specified bucket
+            const uploadedMedia = await mediaService.createMultipleMedia(
+                files ,
+                req.body.bucket, // bucket ID from request body
+                req.user._id
+            );
+
             return sendResponse(res, {
                 status: 201,
                 success: true,
-                message: RESPONSE_MESSAGES.MEDIA_CREATED,
-                data: media,
+                message:
+                    uploadedMedia.length > 1
+                        ? RESPONSE_MESSAGES.MULTIPLE_MEDIA_CREATED ||
+                          "Multiple media uploaded successfull"
+                        : RESPONSE_MESSAGES.MEDIA_CREATED || "Media uploaded",
+                data: uploadedMedia,
             });
         } catch (error) {
             return sendResponse(res, {
@@ -40,7 +65,10 @@ class MediaController {
 
     async getMediaByBucket(req, res) {
         try {
-            const media = await mediaService.getMediaByBucket(req.params.bucketId, req.user._id);
+            const media = await mediaService.getMediaByBucket(
+                req.params.bucketId,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 200,
                 success: true,
@@ -79,7 +107,10 @@ class MediaController {
 
     async deleteMedia(req, res) {
         try {
-            const result = await mediaService.deleteMedia(req.params.id, req.user._id);
+            const result = await mediaService.deleteMedia(
+                req.params.id,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 200,
                 success: true,
@@ -96,4 +127,4 @@ class MediaController {
     }
 }
 
-export default new MediaController(); 
+export default new MediaController();
