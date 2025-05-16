@@ -3,6 +3,8 @@ import multer from "multer";
 const storage = multer.memoryStorage(); // Use memory storage in serverless
 
 const fileFilter = (req, file, cb) => {
+    console.log("file store meddileware ");
+    
     const allowedTypes = ["image/", "video/"];
     if (allowedTypes.some((type) => file.mimetype.startsWith(type))) {
         cb(null, true);

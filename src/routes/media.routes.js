@@ -21,10 +21,11 @@ router.use(authorizeRoles("photographer"));
 router.post(
     "/",
     // flexibleUpload,
-    upload.array("file", 10),
+    upload.array("files", 10),
     // validate(mediaValidation.createMedia),
     mediaController.uploadMedia
 );
+// get all media by bucket id 
 router.get("/:id", mediaController.getMedia);
 router.delete("/:id", mediaController.deleteMedia);
 // router.post("/:id/like", mediaController.likeMedia);

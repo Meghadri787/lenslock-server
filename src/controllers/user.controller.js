@@ -92,13 +92,11 @@ export const updateUserProfilePic = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const { id } = req.user;
-    const user = await UserService.getUserById(id);
     return sendResponse(res, { 
       status: HTTP_STATUS.OK, 
       success: true, 
       message: RESPONSE_MESSAGES.USER_FETCHED, 
-      data: user 
+      data: req.user 
     });
   } catch (error) {
     return sendResponse(res, { 

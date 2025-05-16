@@ -74,55 +74,6 @@ export const UserService = {
     return user
   },
 
-  async getUserById(id) {
-    const user = await Users.aggregate([
-      {
-        $match: { _id: new mongoose.Types.ObjectId(id) } // Match the user by ID
-      },
-
-      {
-        $lookup: {
-          from: "users", // Collection name should match MongoDB collection (pluralized)
-          localField: "friends",
-          foreignField: "_id",
-          as: "friends",
-        }
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "friendsRequast", // Ensure the field name matches the schema
-          foreignField: "_id",
-          as: "friendRequests",
-        }
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "sendFriendRequst",
-          foreignField: "_id",
-          as: "sentFriendRequests",
-        }
-      },
-      {
-        $project: {
-          name: 1,
-          email: 1,
-          profile_pic: 1,
-          totalFriends: { $size: "$friends" }, // Calculate total number of friends
-          friends: { _id:1 , name: 1, email: 1, profile_pic: 1 },
-          friendRequests: { _id:1 , name: 1, email: 1, profile_pic: 1 },
-          sentFriendRequests: {_id:1 , name: 1, email: 1, profile_pic: 1 }
-        }
-      }
-    ]);
-
-
-  if (!user) throw new Error("User not found")
- console.log("user ========> " , user);
- 
-  return user 
-},
 
   async getAllUser(userId){
     return await Users.find({_id : {$ne:userId}})

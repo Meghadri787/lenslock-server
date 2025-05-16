@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 const bucketSchema = new Schema(
     {
@@ -41,15 +41,32 @@ const bucketSchema = new Schema(
         ],
         accessRequests: [
             {
-                type: Schema.Types.ObjectId,
+               user : {
+                  type: Schema.Types.ObjectId,
                 ref: "user",
                 required: true,
+               }  ,
+               status : {
+                   type : String ,
+                   enum : ["pending" , "rejected" , "accept"] ,
+                   default : "pending"
+               } ,
+               createdAt :{
+                type : Date ,
+                default : Date.now()
+               }
             },
         ],
         isPublic: {
             type: Boolean,
             default: false,
         },
+        mediaList : [
+            {
+                type:mongoose.Schema.Types.ObjectId,
+                ref : "media" ,
+            }
+        ]
     },
     { timestamps: true }
 );

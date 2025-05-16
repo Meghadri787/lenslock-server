@@ -16,17 +16,27 @@ class BucketService {
     async getBuckets(userId) {
         console.log(userId);
         const buckets = await Buckets.find({ user: userId })
-            .populate("user", "_id name email")
-            .populate("accessList.user", "_id name email")
-            .populate("accessRequests.user", "_id name email");
+            .populate("user", "_id profile_pic name email")
+            .populate({
+                path: "accessList",
+                select: "_id name email profile_pic",
+            })
+            .populate("accessRequests.user", "_id profile_pic name email")
+            .populate("mediaList",
+                "_id media mediaType createdAt");
+
         return buckets;
     }
 
     async getBucket(id) {
-        const bucket = await Buckets.findById(id).populate(
-            "photographer",
-            "name email"
-        );
+        const bucket = await Buckets.findById(id).populate("user", "_id profile_pic name email")
+            .populate({
+                path: "accessList",
+                select: "_id name email profile_pic",
+            })
+            .populate("accessRequests.user", "_id profile_pic name email")
+            .populate("mediaList",
+                "_id media mediaType createdAt");
 
         if (!bucket) {
             throw new Error("Bucket not found");
@@ -140,24 +150,24 @@ class BucketService {
     }
 
     async requestBucketAccess(id, userId) {
-        const bucket = await Buckets.findById(id).populate(
-            "photographer",
-            "name email"
-        );
+        const bucket = await Buckets.findById(id).populate("user", "_id profile_pic name email");
 
         if (!bucket) {
             throw new Error("Bucket not found");
         }
 
         // Check if user is not the bucket owner
-        if (bucket.photographer.toString() === userId) {
+        if (bucket.user._id.toString() === userId) {
             throw new Error("Cannot request access to your own bucket");
         }
+
+        console.log("========================", bucket.accessList, userId);
+
 
         // Check if user already has access
         if (
             bucket.accessList.some(
-                (access) => access.user.toString() === userId
+                (access) => access.toString() === userId.toString()
             )
         ) {
             throw new Error("You already have access to this bucket");
@@ -173,23 +183,27 @@ class BucketService {
         }
 
         // Add access request
+
+        const isMatch = bucket.accessRequests.find((item) => String(item.user) === String(userId))
+        console.log(isMatch, userId);
+
+        if (isMatch) {
+            throw Error("You have already send request for access this Bucket ")
+        }
+
         bucket.accessRequests.push({
             user: userId,
-            status: "pending",
-            requestedAt: new Date(),
         });
 
         await bucket.save();
 
         // Send notification email to photographer
         await sendEmail({
-            to: bucket.photographer.email,
+            receiver: bucket.user.email,
             subject: "New Bucket Access Request",
-            html: `
-                <h1>New Access Request</h1>
-                <p>Someone has requested access to your bucket "${bucket.name}".</p>
-                <p>Please review and respond to this request.</p>
-            `,
+            message: `
+                Someone has requested access to your bucket "${bucket.name}".
+                Please review and respond to this request.`
         });
 
         return bucket;
@@ -197,53 +211,61 @@ class BucketService {
 
     async respondToAccessRequest(id, requestId, response, userId) {
         const bucket = await Buckets.findById(id).populate(
-            "photographer",
-            "name email"
-        );
+            "user",
+            " _id  name email"
+        )
+            .populate("accessRequests.user", "_id email name")
+            ;
 
         if (!bucket) {
             throw new Error("Bucket not found");
         }
 
         // Check if user is the bucket owner
-        if (bucket.photographer.toString() !== userId) {
+        if (bucket.user?._id.toString() !== userId.toString()) {
             throw new Error("Not authorized to respond to access requests");
         }
 
         // Find the access request
-        const accessRequest = bucket.accessRequests.id(requestId);
+        const accessRequest = bucket.accessRequests.find(item => String(item.user._id) === String(requestId));
         if (!accessRequest) {
             throw new Error("Access request not found");
         }
 
         if (response === "accept") {
             // Add user to access list
-            bucket.accessList.push({
-                user: accessRequest.user,
-                role: "viewer",
-                grantedAt: new Date(),
-            });
+
+            const isMatch = bucket.accessList.find(item => item.toString() === accessRequest.user._id.toString())
+            if (isMatch) {
+                throw Error("User already access this Bucket !")
+            }
+
+            bucket.accessList.push(
+                accessRequest.user._id,
+            );
+
+            console.log("---------", accessRequest);
 
             // Send acceptance email to user
-            await sendEmail({
-                to: accessRequest.user.email,
-                subject: "Bucket Access Request Accepted",
-                html: `
-                    <h1>Access Request Accepted</h1>
-                    <p>Your request for access to "${bucket.name}" has been accepted.</p>
-                    <p>You can now view the contents of this bucket.</p>
+            await sendEmail(
+                accessRequest.user.email,
+                "Bucket Access Request Accepted",
+                `
+                    Access Request Accepted
+                    Your request for access to "${bucket.name}" has been accepted.
+                    You can now view the contents of this bucket.
                 `,
-            });
+            );
         } else if (response === "reject") {
             // Send rejection email to user
-            await sendEmail({
-                to: accessRequest.user.email,
-                subject: "Bucket Access Request Rejected",
-                html: `
-                    <h1>Access Request Rejected</h1>
-                    <p>Your request for access to "${bucket.name}" has been rejected.</p>
+            await sendEmail(
+                accessRequest.user.email,
+                "Bucket Access Request Rejected",
+                `
+                    Access Request Rejected
+                    Your request for access to "${bucket.name}" has been rejected.
                 `,
-            });
+            );
         } else {
             throw new Error(
                 "Invalid response. Must be either 'accept' or 'reject'"
@@ -252,7 +274,7 @@ class BucketService {
 
         // Remove the access request
         bucket.accessRequests = bucket.accessRequests.filter(
-            (request) => request._id.toString() !== requestId
+            (request) => request.user._id.toString() !== requestId.toString()
         );
 
         await bucket.save();

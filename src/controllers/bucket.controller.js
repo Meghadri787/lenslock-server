@@ -45,7 +45,7 @@ class BucketController {
             return sendResponse(res, {
                 status: 200,
                 success: true,
-                data: bucket,
+                data: bucket ,
             });
         } catch (error) {
             return sendResponse(res, {
@@ -169,6 +169,10 @@ class BucketController {
                 data: result,
             });
         } catch (error) {
+
+            console.error("============================================ error " , error);
+            
+
             return sendResponse(res, {
                 status: 400,
                 success: false,

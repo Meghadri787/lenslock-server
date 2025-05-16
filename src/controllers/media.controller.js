@@ -4,6 +4,8 @@ import { sendResponse } from "../utils/response.handler.js";
 
 class MediaController {
     async uploadMedia(req, res) {
+        console.log("ok done file uploader controller run ");
+        
         try {
             // Check if files were uploaded
             if (!req.files && !req.file) {
@@ -20,7 +22,7 @@ class MediaController {
 
             // Upload all files to the specified bucket
             const uploadedMedia = await mediaService.createMultipleMedia(
-                files,
+                files ,
                 req.body.bucket, // bucket ID from request body
                 req.user._id
             );

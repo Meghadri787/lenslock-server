@@ -5,6 +5,10 @@ import { cloudinaryFileUploader } from "../config/cloudinary.config.js";
 
 class MediaService {
     async createMultipleMedia(files, bucketId, userId) {
+
+        console.log("====================" , files , bucketId , userId);
+        
+
         const bucket = await Buckets.findById(bucketId);
 
         if (!bucket) {
@@ -35,7 +39,7 @@ class MediaService {
             }
 
             // Create media record
-            return Media.create({
+            const media =await  Media.create({
                 bucket: bucketId,
                 user: userId,
                 mediaType: file.mimetype.startsWith("image")
@@ -48,6 +52,12 @@ class MediaService {
                     publicId: uploadResult.public_id,
                 },
             });
+
+            // console.log("===============>>>>>>>>>" , media);
+            
+            bucket.mediaList = [...bucket.mediaList , media._id ]
+            await bucket.save()
+            return media
         });
 
         // Wait for all uploads to complete
@@ -83,9 +93,9 @@ class MediaService {
     }
 
     async getMedia(id) {
-        const media = await Media.findById(id)
-            .populate("bucket", "name")
-            .populate("uploadedBy", "name email");
+        const media = await Media.find({bucket:id})
+            .populate("bucket", "name _id ")
+            .populate("user", "profile_pic _id name email");
 
         if (!media) {
             throw new Error("Media not found");
