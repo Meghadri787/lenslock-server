@@ -5,7 +5,7 @@ import { sendResponse } from "../utils/response.handler.js";
 class MediaController {
     async uploadMedia(req, res) {
         console.log("ok done file uploader controller run ");
-        
+
         try {
             // Check if files were uploaded
             if (!req.files && !req.file) {
@@ -22,7 +22,7 @@ class MediaController {
 
             // Upload all files to the specified bucket
             const uploadedMedia = await mediaService.createMultipleMedia(
-                files ,
+                files,
                 req.body.bucket, // bucket ID from request body
                 req.user._id
             );
@@ -111,6 +111,28 @@ class MediaController {
                 req.params.id,
                 req.user._id
             );
+            return sendResponse(res, {
+                status: 200,
+                success: true,
+                message: RESPONSE_MESSAGES.MEDIA_DELETED,
+                data: result,
+            });
+        } catch (error) {
+            return sendResponse(res, {
+                status: 400,
+                success: false,
+                message: error.message,
+            });
+        }
+    }
+
+    async likeMedia(req, res) {
+        try {
+            const result = await mediaService.likeMedia(
+                req.params.id,
+                req.user._id
+            );
+            console.info("Media liked");
             return sendResponse(res, {
                 status: 200,
                 success: true,

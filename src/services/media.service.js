@@ -5,9 +5,7 @@ import { cloudinaryFileUploader } from "../config/cloudinary.config.js";
 
 class MediaService {
     async createMultipleMedia(files, bucketId, userId) {
-
-        console.log("====================" , files , bucketId , userId);
-        
+        console.log("====================", files, bucketId, userId);
 
         const bucket = await Buckets.findById(bucketId);
 
@@ -39,7 +37,7 @@ class MediaService {
             }
 
             // Create media record
-            const media =await  Media.create({
+            const media = await Media.create({
                 bucket: bucketId,
                 user: userId,
                 mediaType: file.mimetype.startsWith("image")
@@ -54,10 +52,10 @@ class MediaService {
             });
 
             // console.log("===============>>>>>>>>>" , media);
-            
-            bucket.mediaList = [...bucket.mediaList , media._id ]
-            await bucket.save()
-            return media
+
+            bucket.mediaList = [...bucket.mediaList, media._id];
+            await bucket.save();
+            return media;
         });
 
         // Wait for all uploads to complete
@@ -93,7 +91,7 @@ class MediaService {
     }
 
     async getMedia(id) {
-        const media = await Media.find({bucket:id})
+        const media = await Media.find({ bucket: id })
             .populate("bucket", "name _id ")
             .populate("user", "profile_pic _id name email");
 
@@ -159,28 +157,49 @@ class MediaService {
     }
 
     async deleteMedia(id, userId) {
+        console.log(id, userId);
+
         const media = await Media.findById(id);
+        console.log("🚀 ~ MediaService ~ deleteMedia ~ media:", media);
 
         if (!media) {
             throw new Error("Media not found");
         }
 
         const bucket = await Buckets.findById(media.bucket);
+        console.log("🚀 ~ MediaService ~ deleteMedia ~ bucket:", bucket);
 
         // Check if user has access to delete the media
-        if (
-            bucket.photographer.toString() !== userId &&
-            !bucket.accessList.some(
-                (access) =>
-                    access.user.toString() === userId &&
-                    access.role === "editor"
-            )
-        ) {
-            throw new Error("Not authorized to delete this media");
-        }
+        // if (
+        //     bucket.user.toString() !== userId &&
+        //     !bucket.accessList.some((access) => access.toString() === userId)
+        // ) {
+        //     throw new Error("Not authorized to delete this media");
+        // }
+
+        console.log("lajdlad");
 
         await media.deleteOne();
         return { message: "Media deleted successfully" };
+    }
+
+    async likeMedia(mediaId, userId) {
+        const media = await Media.findById(mediaId);
+
+        if (!media) throw new Error("Media not found");
+
+        const hasLiked = media.likes.includes(userId);
+        const updateOperation = hasLiked
+            ? { $pull: { likes: userId } }
+            : { $addToSet: { likes: userId } };
+
+        const updatedMedia = await Media.findByIdAndUpdate(
+            mediaId,
+            updateOperation,
+            { new: true }
+        );
+
+        return updatedMedia;
     }
 }
 
