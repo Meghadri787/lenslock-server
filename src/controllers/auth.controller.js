@@ -108,7 +108,7 @@ export const login = async (req, res, next) => {
 // @route   GET /api/auth/logout
 // @access  Public
 export const logout = (req, res) => {
-    res.status(200).json({
+    res.status(200).cookie(null).json({
         success: true,
         message: "Logged out successfully",
     });
@@ -119,7 +119,7 @@ export const logout = (req, res) => {
 // @access  Private
 export const getMe = async (req, res, next) => {
     try {
-        const user = await Users.findById(req.user.id);
+        const user = await Users.findById(req.user._id);
         res.status(200).json({
             success: true,
             user,
@@ -149,4 +149,4 @@ export const updateProfile = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}; 
+};
