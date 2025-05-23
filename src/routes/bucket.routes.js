@@ -15,13 +15,13 @@ router.get("/:id", bucketController.getBucket);
 // Access management
 router.post("/request-access/:id", bucketController.requestBucketAccess);
 
-
 // Only photographers can create and manage buckets
-router.use(authorizeRoles("photographer"));
+// router.use(authorizeRoles("photographer"));
 
 // Routes
 router.post(
     "/",
+    authorizeRoles("photographer"),
     // validate(bucketValidation.createBucket),
     bucketController.createBucket
 );
@@ -29,11 +29,15 @@ router.get("/", bucketController.getBuckets);
 
 router.put(
     "/:id",
+    authorizeRoles("photographer"),
     validate(bucketValidation.updateBucket),
     bucketController.updateBucket
 );
-router.delete("/:id", bucketController.deleteBucket);
-
+router.delete(
+    "/:id",
+    authorizeRoles("photographer"),
+    bucketController.deleteBucket
+);
 
 // Generate QR code
 router.get("/:id/qr-code", bucketController.generateQRCode);

@@ -5,7 +5,10 @@ import { sendResponse } from "../utils/response.handler.js";
 class BucketController {
     async createBucket(req, res) {
         try {
-            const bucket = await bucketService.createBucket(req.body, req.user._id);
+            const bucket = await bucketService.createBucket(
+                req.body,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 201,
                 success: true,
@@ -23,7 +26,6 @@ class BucketController {
 
     async getBuckets(req, res) {
         try {
-           
             const buckets = await bucketService.getBuckets(req.user._id);
             return sendResponse(res, {
                 status: 200,
@@ -42,10 +44,11 @@ class BucketController {
     async getBucket(req, res) {
         try {
             const bucket = await bucketService.getBucket(req.params.id);
+            console.log("🚀 ~ BucketController ~ getBucket ~ bucket:", bucket);
             return sendResponse(res, {
                 status: 200,
                 success: true,
-                data: bucket ,
+                data: bucket,
             });
         } catch (error) {
             return sendResponse(res, {
@@ -80,7 +83,10 @@ class BucketController {
 
     async deleteBucket(req, res) {
         try {
-            const result = await bucketService.deleteBucket(req.params.id, req.user._id);
+            const result = await bucketService.deleteBucket(
+                req.params.id,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 200,
                 success: true,
@@ -98,7 +104,10 @@ class BucketController {
 
     async generateQRCode(req, res) {
         try {
-            const result = await bucketService.generateQRCode(req.params.id, req.user._id);
+            const result = await bucketService.generateQRCode(
+                req.params.id,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 200,
                 success: true,
@@ -138,7 +147,10 @@ class BucketController {
 
     async requestBucketAccess(req, res) {
         try {
-            const bucket = await bucketService.requestBucketAccess(req.params.id, req.user._id);
+            const bucket = await bucketService.requestBucketAccess(
+                req.params.id,
+                req.user._id
+            );
             return sendResponse(res, {
                 status: 200,
                 success: true,
@@ -169,9 +181,10 @@ class BucketController {
                 data: result,
             });
         } catch (error) {
-
-            console.error("============================================ error " , error);
-            
+            console.error(
+                "============================================ error ",
+                error
+            );
 
             return sendResponse(res, {
                 status: 400,
@@ -182,4 +195,4 @@ class BucketController {
     }
 }
 
-export default new BucketController(); 
+export default new BucketController();
