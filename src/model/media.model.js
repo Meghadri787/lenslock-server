@@ -28,14 +28,13 @@ const mediaSchema = new Schema(
         },
         likes: [
             {
-                user: {
-                    type: Schema.Types.ObjectId,
-                    ref: "user",
-                },
+                type: Schema.Types.ObjectId,
+                ref: "user",
+                index: true,
             },
         ],
     },
     { timestamps: true }
 );
 
-export const Media = model("media", mediaSchema); 
+export const Media = model("media", mediaSchema);

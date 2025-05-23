@@ -25,16 +25,18 @@ router.post(
     // validate(mediaValidation.createMedia),
     mediaController.uploadMedia
 );
-// get all media by bucket id 
+// get all media by bucket id
 router.get("/:id", mediaController.getMedia);
 router.delete("/:id", mediaController.deleteMedia);
 // router.post("/:id/like", mediaController.likeMedia);
 // router.delete("/:id/like", mediaController.unlikeMedia);
 router.get("/bucket/:bucketId", mediaController.getMediaByBucket);
-router.put(
-    "/:id",
-    validate(mediaValidation.updateMedia),
-    mediaController.updateMedia
-);
+router
+    .put(
+        "/:id",
+        validate(mediaValidation.updateMedia),
+        mediaController.updateMedia
+    )
+    .patch("/like/:id", mediaController.likeMedia);
 
 export default router;
