@@ -14,6 +14,8 @@ const router = express.Router();
 // Protect all routes
 router.use(isAuthenticate);
 
+router.patch("/like/:id", mediaController.likeMedia);
+
 // Only photographers can create and manage media
 router.use(authorizeRoles("photographer"));
 
@@ -31,12 +33,10 @@ router.delete("/:id", mediaController.deleteMedia);
 // router.post("/:id/like", mediaController.likeMedia);
 // router.delete("/:id/like", mediaController.unlikeMedia);
 router.get("/bucket/:bucketId", mediaController.getMediaByBucket);
-router
-    .put(
-        "/:id",
-        validate(mediaValidation.updateMedia),
-        mediaController.updateMedia
-    )
-    .patch("/like/:id", mediaController.likeMedia);
+router.put(
+    "/:id",
+    validate(mediaValidation.updateMedia),
+    mediaController.updateMedia
+);
 
 export default router;
