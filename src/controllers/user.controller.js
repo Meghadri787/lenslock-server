@@ -5,7 +5,7 @@ import { sendResponse } from "../utils/response.handler.js";
 
 export const createUser = async (req, res) => {
     try {
-        const user = await UserService.createUser(req.body, res);
+        const user = await UserService.createUser(req.body);
         return sendResponse(res, {
             status: HTTP_STATUS.CREATED,
             data: user,
