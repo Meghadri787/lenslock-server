@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import { sendCookie } from "../utils/tokenGenarate.js";
 
 export const UserService = {
-    async createUser(body) {
+    async createUser(body, res) {
         console.log("ok created account ");
 
         // step1 : email exist or not
@@ -32,6 +32,7 @@ export const UserService = {
             "Thank you for choosing BookBuddy. for your Reading Partner ."
         );
         // await sendEmail(user.email, "Verify Account - OTP", otp)
+        sendCookie(user, res, "Register successful successful");
         return user;
     },
 
