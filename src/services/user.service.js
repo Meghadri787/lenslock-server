@@ -32,7 +32,6 @@ export const UserService = {
             "Thank you for choosing BookBuddy. for your Reading Partner ."
         );
         // await sendEmail(user.email, "Verify Account - OTP", otp)
-        sendCookie(user, res, "Register successful successful");
         return user;
     },
 
