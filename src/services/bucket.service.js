@@ -15,7 +15,9 @@ class BucketService {
 
     async getBuckets(userId) {
         console.log(userId);
-        const buckets = await Buckets.find({ user: userId })
+        const buckets = await Buckets.find({
+            $or: [{ user: userId }, { accessList: userId }],
+        })
             .populate("user", "_id profile_pic name email")
             .populate({
                 path: "accessList",
